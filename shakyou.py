@@ -101,7 +101,7 @@ def main():
         input()
         return
 
-    if not os.path.exists(file_path):
+    if not os.path.exists(project_dir):
         os.mkdir(project_dir)
 
     print('[*] ファイル生成しました。動作保証はしません。')
