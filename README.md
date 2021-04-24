@@ -25,3 +25,7 @@
 - ソースコードは自由に改造してもらってもOK
 - pyDotexeによって、実行ファイル形式にしました
 - 動作保証はしません。これで課題落としても知らん
+
+## 動作
+
+![Animation](https://user-images.githubusercontent.com/31305419/115968455-09d97380-a573-11eb-99cc-04e24255af3a.gif)
