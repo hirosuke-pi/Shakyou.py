@@ -1,1 +1,0 @@
-pydotexe -build -src shakyou.py -pydir requests -pydir certifi

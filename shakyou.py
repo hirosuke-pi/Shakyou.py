@@ -3,6 +3,7 @@ import re
 import os, sys
 import threading
 import time
+import pprint
 
 
 """
@@ -51,6 +52,7 @@ def parseRawPDF(filePath):
             filename_after = filename_before
             filename_before = file_repatter.sub('', line)
     
+    optimized_list[filename_before] = tmp_list
     return optimized_list
 
 
@@ -121,7 +123,7 @@ def main():
     # PDFファイル入力
     print(' +' + ('-'*55) + '+')
     print(' |' + (' '*55) + '|')
-    print(' |' + 'Shakyou.py - v2.00'.center(55, ' ') + '|')
+    print(' |' + 'Shakyou.py - v2.10'.center(55, ' ') + '|')
     print(' |' + (' '*55) + '|')
     print(' +' + ('-'*55) + '+')
     print('  → 写経を楽にしたいという煩悩に負けたあなたへ！')
