@@ -1,17 +1,26 @@
 from tika import parser
 import re
-import os
+import os, sys
+import threading
+import time
 
 
 """
     PDFから文字を抽出
 """
 def parseRawPDF(filePath):
+    if not os.path.isfile(filePath):
+        raise Exception('これは存在しないファイルです！')
+
     # 変数初期化
     file_data = parser.from_file(filePath)
     newline_repatter = re.compile('¬…$')
     file_repatter = re.compile('^Page [0-9]+/[0-9]')
     code_repatter = re.compile('([0-9]+|¬[0-9]+)$')
+
+    if file_data['content'] is None:
+        raise Exception('写経元PDFファイルを選択してください！')
+    raw_content_list = file_data['content'].splitlines()
 
     optimized_list = {}
     tmp_list = []
@@ -19,7 +28,7 @@ def parseRawPDF(filePath):
     pt = 0
     filename_before = 'project'
     filename_after = ''
-    for line in file_data['content'].splitlines():
+    for line in raw_content_list:
         result = code_repatter.search(line)
 
         # コード判定
@@ -62,6 +71,8 @@ def formatCode(fileDict, indent=4):
 
     if '' in fileDict:
         del fileDict['']
+    if fileDict is None or len(fileDict) <= 0:
+        raise Exception('これ本当に写経元PDFですか？')
 
     # コードにインデントを追加
     for f in fileDict:
@@ -85,31 +96,72 @@ def parseShakyouPDF(filePath):
     return formatCode(parseRawPDF(filePath))
 
 
+class LoadingThread(threading.Thread):
+    def __init__(self):
+        threading.Thread.__init__(self)
+        self.flag = False
+        self.text = ''
+    
+    def spinner_gen(self):
+        while True:
+            yield '|'
+            yield '/'
+            yield '-'
+            yield '\\'
+
+    def run(self):
+        for spinner in self.spinner_gen():
+            time.sleep(0.1)
+            sys.stdout.write('\r [' + spinner + '] '+ self.text)
+            sys.stdout.flush()
+            if self.flag: break
+
+
 def main():
-    print('### Shakyou.py - v1.00')
-    print('[+] 写経を楽にしたいという煩悩に負けたあなたへ！')
-    print('[+] 写経用PDFを下にドラッグしてENTERすると、生成されます\r\n')
-    file_path = input('[PDF]: ')
+    # PDFファイル入力
+    print(' +' + ('-'*55) + '+')
+    print(' |' + (' '*55) + '|')
+    print(' |' + 'Shakyou.py - v2.00'.center(55, ' ') + '|')
+    print(' |' + (' '*55) + '|')
+    print(' +' + ('-'*55) + '+')
+    print('  → 写経を楽にしたいという煩悩に負けたあなたへ！')
+    print('  → 写経用PDFを下にドラッグしてENTERすると、生成されます。\r\n')
+    file_path = input(' [PDF]: ')
+
     dirname = os.path.dirname(file_path)
+    print()
 
-    print('\r\n[*] 写経プログラムを抽出中...')
-    project, formatDict = parseShakyouPDF(file_path)
-    project_dir = os.path.join(dirname, project)
+    # ローディング画面描画
+    load = LoadingThread()
+    load.text = '写経プログラムを抽出中...'
+    load.start()
 
-    if len(formatDict) <= 0:
-        print('\r\n[-] エラーが発生しました。残念でした。')
-        input()
-        return
+    try:
+        # PDF解析開始
+        project, formatDict = parseShakyouPDF(file_path)
+        project_dir = os.path.join(dirname, project)
 
-    if not os.path.exists(project_dir):
-        os.mkdir(project_dir)
+        # フォルダ作成
+        if not os.path.exists(project_dir):
+            os.mkdir(project_dir)
 
-    print('[*] ファイル生成しました。動作保証はしません。')
-    for file_name in formatDict:
-        print(' - '+ os.path.join(project_dir, file_name))
-        with open(os.path.join(project_dir, file_name), 'w', encoding='utf-8') as f:
-            f.write('\n'.join(formatDict[file_name]))
-    input('\r\n[+] ENTERキーを押して終了します...')
+        # ローディング画面描画の停止
+        load.flag = True
+        load.join()
+
+        # ファイル書き出し
+        print('\r [*] 抽出に成功しました。以下のファイルに書き出し中...')
+        for file_name in formatDict:
+            print('  - '+ os.path.join(project_dir, file_name))
+            with open(os.path.join(project_dir, file_name), 'w', encoding='utf-8') as f:
+                f.write('\n'.join(formatDict[file_name]))
+        print('\r\n [*] ファイル生成しました。動作保証はしません。')
+
+    except Exception as e:
+        load.flag = True
+        load.join()
+        print('\r [-] エラーが発生しました: '+ str(e))
+    input()
 
 
 if __name__ == "__main__":
