@@ -52,6 +52,9 @@ def parseRawPDF(filePath):
             filename_after = filename_before
             filename_before = file_repatter.sub('', line)
     
+    if len(tmp_list) == 0 and filename_before == 'project':
+        return {}
+
     optimized_list[filename_before] = tmp_list
     return optimized_list
 
@@ -65,7 +68,7 @@ def formatCode(fileDict, indent=4):
     indent_dict = {}
 
     # プロジェクト名抽出
-    if 'project' in fileDict:
+    if 'project' in fileDict and len(fileDict['project']) > 0:
         project = fileDict['project'][0]
         del fileDict['project']
     else:
@@ -94,8 +97,26 @@ def formatCode(fileDict, indent=4):
     return (project, indent_dict)
 
 
+def makePackageDir(project, fileDict):
+    formatDict = fileDict
+    package_repatter = re.compile('^package +')
+
+    for file_name in list(formatDict):
+        if len(formatDict[file_name]) <= 0:
+            continue
+         
+        result = package_repatter.search(formatDict[file_name][0])
+        dirpath = file_name
+        if bool(result):
+            dirpath = package_repatter.sub('', formatDict[file_name][0]).replace(';', '').replace('.', '\\') + '\\' + dirpath
+        formatDict[dirpath] = formatDict.pop(file_name)
+
+    return (project, fileDict)
+
+
 def parseShakyouPDF(filePath):
-    return formatCode(parseRawPDF(filePath))
+    project, formatDict = formatCode(parseRawPDF(filePath))
+    return makePackageDir(project, formatDict)
 
 
 class LoadingThread(threading.Thread):
@@ -123,12 +144,12 @@ def main():
     # PDFファイル入力
     print(' +' + ('-'*55) + '+')
     print(' |' + (' '*55) + '|')
-    print(' |' + 'Shakyou.py - v2.10'.center(55, ' ') + '|')
+    print(' |' + 'Shakyou.py - v3.00'.center(55, ' ') + '|')
     print(' |' + (' '*55) + '|')
     print(' +' + ('-'*55) + '+')
     print('  → 写経を楽にしたいという煩悩に負けたあなたへ！')
     print('  → 写経用PDFを下にドラッグしてENTERすると、生成されます。\r\n')
-    file_path = input(' [PDF]: ')
+    file_path = input(' [PDF]: ').replace('"', '')
 
     dirname = os.path.dirname(file_path)
     print()
@@ -144,27 +165,30 @@ def main():
         project_dir = os.path.join(dirname, project)
 
         # フォルダ作成
-        if not os.path.exists(project_dir):
-            os.mkdir(project_dir)
+        for file_name in formatDict:
+            dirpath = os.path.join(project_dir, os.path.dirname(file_name))
+            os.makedirs(dirpath, exist_ok=True)
 
         # ローディング画面描画の停止
         load.flag = True
         load.join()
 
         # ファイル書き出し
-        print('\r [*] 抽出に成功しました。以下のファイルに書き出し中...')
+        print('\r [+] 抽出に成功しました。以下のファイルに書き出し中...')
+        print(' [*] '+ project_dir)
         for file_name in formatDict:
-            print('  - '+ os.path.join(project_dir, file_name))
+            print('  - '+file_name)
             with open(os.path.join(project_dir, file_name), 'w', encoding='utf-8') as f:
                 f.write('\n'.join(formatDict[file_name]))
-        print('\r\n [*] ファイル生成しました。動作保証はしません。')
+        print('\r\n [+] ファイル生成しました。動作保証はしません。')
 
     except Exception as e:
         load.flag = True
         load.join()
         print('\r [-] エラーが発生しました: '+ str(e))
-    input()
 
 
 if __name__ == "__main__":
-    main()
+    while True:
+        main()
+        print('\r\n')
