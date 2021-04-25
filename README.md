@@ -3,12 +3,10 @@
 - S先生の写経を楽にしたいという人向けです。
 - v2.10以前のバージョンは正しく動かないです!
 
-## 必須プログラム (Windows)
+## 必須プログラム
 
 ### Java Runtime
- - https://www.java.com/ja/download/windows_offline.jsp
-### vcruntime140.dll
- - https://www.microsoft.com/ja-jp/download/details.aspx?id=48145
+ - https://www.java.com/ja/download/
 
 ### Python3.9 (コードから実行する時のみ)
  - https://www.python.org/downloads/release/python-394/
@@ -25,11 +23,12 @@
 
 ## 使い方 (Mac, コードから実行)
 
-1. Pythonをダウンロードしてインストール
-2. shakyou.pyをダウンロード
-3. シェルを開いてを実行: `pip install tika`
-4. シェルにて、shakyou.pyがあるフォルダまで移動
-5. shakyou.pyを実行: `python shakyou.py`
+1. 以上のプログラムをインストールする
+2. Pythonをダウンロードしてインストール
+3. shakyou.pyをダウンロード
+4. シェルを開いてを実行: `pip install tika`
+5. シェルにて、shakyou.pyがあるフォルダまで移動
+6. shakyou.pyを実行: `python shakyou.py`
 
 ## 注意事項
 
