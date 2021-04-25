@@ -97,19 +97,22 @@ def formatCode(fileDict, indent=4):
     return (project, indent_dict)
 
 
+"""
+    パッケージごとにフォルダで分ける
+"""
 def makePackageDir(project, fileDict):
-    formatDict = fileDict
     package_repatter = re.compile('^package +')
 
-    for file_name in list(formatDict):
-        if len(formatDict[file_name]) <= 0:
+    for file_name in list(fileDict):
+        if len(fileDict[file_name]) <= 0:
             continue
-         
-        result = package_repatter.search(formatDict[file_name][0])
+        
+        # パッケージ名取得
+        result = package_repatter.search(fileDict[file_name][0])
         dirpath = file_name
         if bool(result):
-            dirpath = package_repatter.sub('', formatDict[file_name][0]).replace(';', '').replace('.', '\\') + '\\' + dirpath
-        formatDict[dirpath] = formatDict.pop(file_name)
+            dirpath = package_repatter.sub('', fileDict[file_name][0]).replace(';', '').replace('.', '\\') + '\\' + dirpath
+        fileDict[dirpath] = fileDict.pop(file_name)
 
     return (project, fileDict)
 

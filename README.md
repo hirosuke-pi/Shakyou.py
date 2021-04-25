@@ -26,9 +26,9 @@
 1. 以上のプログラムをインストールする
 2. Pythonをダウンロードしてインストール
 3. shakyou.pyをダウンロード
-4. シェルを開いてを実行: `pip install tika`
+4. シェルを開いてを実行: `pip3 install tika`
 5. シェルにて、shakyou.pyがあるフォルダまで移動
-6. shakyou.pyを実行: `python shakyou.py`
+6. shakyou.pyを実行: `python3 shakyou.py`
 
 ## 注意事項
 
