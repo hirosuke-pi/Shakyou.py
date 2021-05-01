@@ -3,6 +3,7 @@ import re
 import os, sys
 import threading
 import time
+import zipfile
 
 
 """
@@ -119,6 +120,12 @@ def makePackageDir(project, fileDict):
 def parseShakyouPDF(filePath):
     project, formatDict = formatCode(parseRawPDF(filePath))
     return makePackageDir(project, formatDict)
+
+
+def getZipArchive(project, formatDict, zipPath):
+    with zipfile.ZipFile(zipPath, 'w', compression=zipfile.ZIP_DEFLATED) as new_zip:
+        for file_name in formatDict:
+            new_zip.writestr(os.path.join(project, file_name), '\n'.join(formatDict[file_name]))
 
 
 class LoadingThread(threading.Thread):
