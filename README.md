@@ -3,6 +3,9 @@
 - S先生の写経を楽にしたいという人向けです。
 - v2.10以前のバージョンは正しく動かないです!
 
+## Web版
+> http://hirosuke-pi.work/Shakyou-Web/
+
 ## 必須プログラム
 
 ### Java Runtime
