@@ -88,8 +88,8 @@ def send_req_error(msg, code):
     global res_json
     res_json['status'] = 'error'
     res_json['msg-jp'] = msg
-    del res_json['zip-id']
-    del res_json['filename']
+    res_json.pop('zip-id', None)
+    res_json.pop('filename', None)
     return make_response(json.dumps(res_json, ensure_ascii=False), code)
 
 def send_req_success(msg, filename, zip_id):
