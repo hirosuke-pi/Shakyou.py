@@ -6,6 +6,7 @@ import io
 
 from flask import Flask, make_response, request, send_file
 from flask_cors import CORS, cross_origin
+from waitress import serve
 import json
 
 import shakyou
@@ -87,6 +88,8 @@ def send_req_error(msg, code):
     global res_json
     res_json['status'] = 'error'
     res_json['msg-jp'] = msg
+    del res_json['zip-id']
+    del res_json['filename']
     return make_response(json.dumps(res_json, ensure_ascii=False), code)
 
 def send_req_success(msg, filename, zip_id):
@@ -104,4 +107,5 @@ def get_filename(path):
 
 
 if __name__ == '__main__':
-    api.run(host='0.0.0.0', port=45829, debug=True)
+    #api.run(host='0.0.0.0', port=45829, debug=True)
+    serve(api, host='0.0.0.0', port=45829)

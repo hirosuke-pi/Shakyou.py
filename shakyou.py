@@ -15,7 +15,7 @@ def parseRawPDF(filePath):
 
     # 変数初期化
     file_data = parser.from_file(filePath)
-    newline_repatter = re.compile('¬…$')
+    newline_repatter = re.compile('¬…$|…')
     file_repatter = re.compile('^Page [0-9]+/[0-9]')
     code_repatter = re.compile('([0-9]+|¬[0-9]+)$')
 
@@ -25,6 +25,8 @@ def parseRawPDF(filePath):
 
     optimized_list = {}
     tmp_list = []
+    php_dir_list = []
+    php_flag = False
     index = 0
     pt = 0
     filename_before = 'project'
@@ -51,7 +53,7 @@ def parseRawPDF(filePath):
         elif bool(file_repatter.search(line)):
             filename_after = filename_before
             filename_before = file_repatter.sub('', line)
-    
+
     if len(tmp_list) == 0 and filename_before == 'project':
         return {}
 
@@ -98,7 +100,7 @@ def formatCode(fileDict, indent=4):
 
 
 """
-    パッケージごとにフォルダで分ける
+    [Java] パッケージごとにフォルダで分ける
 """
 def makePackageDir(project, fileDict):
     package_repatter = re.compile('^package +')
@@ -117,9 +119,40 @@ def makePackageDir(project, fileDict):
     return (project, fileDict)
 
 
+"""
+    [PHP] 階層ごとにフォルダで分ける
+"""
+def makePHPSrcDir(project, fileDict):
+    dir_repatter = re.compile('^Src[0-9]+: +')
+
+    for file_name in list(fileDict):
+        if file_name.lower().endswith('.txt') and file_name in fileDict:
+            for line in fileDict[file_name]:
+                result = dir_repatter.search(line)
+                if not bool(result):
+                    continue
+
+                dirpath = dir_repatter.sub('', line).lstrip('/')
+                rep_name = os.path.basename(dirpath)
+                if rep_name in fileDict:
+                    fileDict[dirpath] = fileDict.pop(rep_name)
+
+    return (project, fileDict)
+
+
 def parseShakyouPDF(filePath):
     project, formatDict = formatCode(parseRawPDF(filePath))
-    return makePackageDir(project, formatDict)
+
+    php_flag = False
+    for f in formatDict:
+        if str(f).lower().endswith('.php'):
+            php_flag = True
+            break
+
+    if php_flag:
+        return makePHPSrcDir(project, formatDict)
+    else:
+        return makePackageDir(project, formatDict)
 
 
 def getZipArchive(project, formatDict, zipPath):
@@ -161,7 +194,7 @@ def main():
 . ######:: ##:::: ##: ##:::: ##: ##::. ##:::: ##::::. #######::. #######::
 :......:::..:::::..::..:::::..::..::::..:::::..::::::.......::::.......:::
 """)
-    print('  → Shakyou.py v3.10  |  hirosuke-pi')
+    print('  → Shakyou.py v3.20  |  hirosuke-pi')
     print('  → 写経を楽にしたいという煩悩に負けたあなたへ！')
     print('  → 写経用PDFを下にドラッグしてENTERすると、生成されます。\r\n')
     file_path = input(' [PDF]: ').replace('"', '')
