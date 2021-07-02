@@ -78,8 +78,8 @@ def formatCode(fileDict, indent=4):
 
     if '' in fileDict:
         del fileDict['']
-    if fileDict is None or len(fileDict) <= 0:
-        raise Exception('これ本当に写経元PDFですか？')
+    #if fileDict is None or len(fileDict) <= 0:
+    #    raise Exception('これ本当に写経元PDFですか？')
 
     # コードにインデントを追加
     for f in fileDict:
@@ -103,7 +103,7 @@ def formatCode(fileDict, indent=4):
     [Java] パッケージごとにフォルダで分ける
 """
 def makePackageDir(project, fileDict):
-    package_repatter = re.compile('^package +')
+    package_repatter = re.compile('.*package +')
 
     for file_name in list(fileDict):
         if len(fileDict[file_name]) <= 0:
@@ -123,7 +123,7 @@ def makePackageDir(project, fileDict):
     [PHP] 階層ごとにフォルダで分ける
 """
 def makePHPSrcDir(project, fileDict):
-    dir_repatter = re.compile('^Src[0-9]+: +')
+    dir_repatter = re.compile('.*Src[0-9]+: +')
 
     for file_name in list(fileDict):
         if file_name.lower().endswith('.txt') and file_name in fileDict:

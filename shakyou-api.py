@@ -3,6 +3,7 @@ import traceback
 import random
 import string
 import io
+import datetime
 
 from flask import Flask, make_response, request, send_file
 from flask_cors import CORS, cross_origin
@@ -15,13 +16,6 @@ import shakyou
 api = Flask(__name__)
 CORS(api)
 
-
-res_json = {
-    'status' : 'success',
-    'msg-jp' : '',
-    'zip-id' : '',
-    'filename' : ''
-}
 UPLOAD_DIR = 'upload_files'
 ZIP_DIR = 'archive_files'
 
@@ -76,6 +70,9 @@ def download():
     if (not os.path.isfile(zip_path)):
         return send_req_error('存在しないパスです: '+ zip_path, 404)
 
+    with open('shakyou.log', 'a', encoding='utf-8') as f:
+        f.write('['+ str(datetime.datetime.now())+ ' - '+ request.environ['REMOTE_ADDR'] +' ('+ request.args.get('name') +')]: ' + request.user_agent.string + '\n')
+
     return send_file(zip_path, as_attachment=True, attachment_filename=get_filename(request.args.get('name'))+'.zip', mimetype='application/zip')
 
 
@@ -85,7 +82,7 @@ def not_found(error):
 
 
 def send_req_error(msg, code):
-    global res_json
+    res_json = {}
     res_json['status'] = 'error'
     res_json['msg-jp'] = msg
     res_json.pop('zip-id', None)
@@ -93,7 +90,7 @@ def send_req_error(msg, code):
     return make_response(json.dumps(res_json, ensure_ascii=False), code)
 
 def send_req_success(msg, filename, zip_id):
-    global res_json
+    res_json = {}
     res_json['status'] = 'success'
     res_json['msg-jp'] = msg
     res_json['zip-id'] = zip_id
@@ -107,5 +104,5 @@ def get_filename(path):
 
 
 if __name__ == '__main__':
-    #api.run(host='0.0.0.0', port=45829, debug=True)
-    serve(api, host='0.0.0.0', port=45829)
+    api.run(host='0.0.0.0', port=45829, debug=True)
+    #serve(api, host='0.0.0.0', port=45829)
